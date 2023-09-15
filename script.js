@@ -106,8 +106,6 @@ const renderCommentChanges = function () {
   });
 };
 
-mainContainer.addEventListener('click', handleVoteClick);
-
 function updateTimeAgo(timestampElement, createdTimestamp) {
   const currentTime = new Date();
   const timeDiff = Math.floor((currentTime - createdTimestamp) / 1000);
@@ -203,6 +201,8 @@ function handleVoteClick(e) {
     localStorage.removeItem(`commentData_${uniqueCommentId}`);
   }
 }
+
+mainContainer.addEventListener('click', handleVoteClick);
 
 const renderInitialTimestamps = function (key, className, uniqueCommentId, html) {
   const timestampEl = document.querySelector(`[data-unique-id="${uniqueCommentId}"] .timestamp`);

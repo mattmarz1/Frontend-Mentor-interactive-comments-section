@@ -359,13 +359,13 @@ path {
   max-width: 430rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 48em) {
   body {
     margin: 20px;
   }
 }
 
-@media (max-width: 52em) {
+@media (max-width: 32.5em) {
   .comment {
     position: relative;
     flex-direction: var(--flex-column);

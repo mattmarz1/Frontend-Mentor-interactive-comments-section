@@ -101,7 +101,7 @@ body {
 main {
   gap: 1.5rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 60rem;
   padding-block: 1rem;
   margin-inline: auto;
 }
@@ -361,7 +361,7 @@ path {
 
 @media (max-width: 48em) {
   body {
-    margin: 20px;
+    margin: 2em;
   }
 }
 

@@ -228,6 +228,7 @@ main {
 
 .create-comment textarea::placeholder {
   font-family: 'Rubik', sans-serif;
+  font-size: 1.3rem;
 }
 
 .send-btn,

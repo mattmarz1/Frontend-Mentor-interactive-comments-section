@@ -285,7 +285,7 @@ replyEl.forEach((el, i) => {
     const createNewReply = document.querySelector('.new-reply');
     const uniqueCommentId = generateUniqueId();
     const recipientUsername = allDefaultComments[i].querySelector('.username').innerHTML;
-    const allCommentsBtnsEls = document.querySelectorAll('.reply, .delete-comment-btn, .edit-comment-btn, .send-btn');
+    const allCommentsBtnEls = document.querySelectorAll('.reply, .delete-comment-btn, .edit-comment-btn, .send-btn');
 
     const replyInputHTML = `
     <div class="new-reply">
@@ -302,7 +302,7 @@ replyEl.forEach((el, i) => {
       setProperty(el, 'opacity', '');
     }
 
-    allCommentsBtnsEls.forEach((btn, innerIndex) => {
+    allCommentsBtnEls.forEach((btn, innerIndex) => {
       setProperty(btn, 'pointerEvents', `${!createNewReply && innerIndex !== i ? 'none' : 'auto'}`);
     });
 
@@ -322,7 +322,7 @@ replyEl.forEach((el, i) => {
         if (newReplyTextAreaEls[index].value.trim().length === 0) {
           return;
         }
-        allCommentsBtnsEls.forEach((btn) => {
+        allCommentsBtnEls.forEach((btn) => {
           setProperty(btn, 'pointerEvents', 'auto');
         });
         const userReply = newReplyTextAreaEls[index].value.replace(`@${recipientUsername}`, '').trim().replace(',', '');
@@ -614,9 +614,7 @@ deleteModalContainer.addEventListener('click', function (e) {
 });
 
 window.addEventListener('DOMContentLoaded', async function () {
-  const resultPromise = data();
-
-  await resultPromise;
+  await data();
 
   const existingComments = JSON.parse(localStorage.getItem('newComment')) || [];
   const existingFirstPostReplyComments = JSON.parse(localStorage.getItem('firstPostNewReply')) || [];

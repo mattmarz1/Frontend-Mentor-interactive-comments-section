@@ -223,6 +223,7 @@ main {
   border-radius: 0.5rem;
   outline: none;
   font-family: inherit;
+  font-size: var(--font-size-medium);
   resize: none;
 }
 

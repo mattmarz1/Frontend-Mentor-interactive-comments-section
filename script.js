@@ -41,12 +41,6 @@ const generateUniqueId = function () {
   return Math.random().toString(36).substr(2, 9);
 };
 
-const preventBackspace = function (e) {
-  if (e.keyCode === 8 || e.key === 'Backspace') {
-    e.preventDefault();
-  }
-};
-
 function isMobileDevice() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
@@ -360,7 +354,7 @@ replyEl.forEach((el, i) => {
                 <p class="edit-comment-btn"><img src="images/icon-edit.svg" alt="" />Edit</p>
               </div>
             </div>
-            <div class="comment-text-container"><span class="replying-to">@${recipientUsername} </span>${userReply}</div>
+            <div class="comment-text-container"><span class="replying-to">@${recipientUsername}</span>${userReply}</div>
           </div>
         </div>`;
 
@@ -394,7 +388,7 @@ replyEl.forEach((el, i) => {
                 <p class="edit-comment-btn"><img src="images/icon-edit.svg" alt="" />Edit</p>
               </div>
             </div>
-            <div class="comment-text-container"><span class="replying-to">@${recipientUsername} </span>${userReply}</div>
+            <div class="comment-text-container"><span class="replying-to">@${recipientUsername}</span>${userReply}</div>
           </div>
         </div>`;
 
@@ -524,14 +518,12 @@ mainContainer.addEventListener('click', function (e) {
       updateBtn = createUpdateBtn;
     }
 
-    const observer = new MutationObserver(function () {
-      if (!commentTextContainer.textContent) {
-        setProperty(updateBtn, 'pointerEvents', 'none');
-        document.addEventListener('keydown', preventBackspace, e);
-      } else {
-        setProperty(updateBtn, 'pointerEvents', 'auto');
-        document.removeEventListener('keydown', preventBackspace);
-      }
+    const observer = new MutationObserver(() => {
+      const isEmpty = !commentTextContainer.textContent;
+      const isReplying = replyingToEl.textContent && commentTextContainer.textContent.includes(replyingToEl.textContent.trim());
+      const isLengthValid = commentTextContainer.textContent.trim().length <= replyingToEl.textContent.trim().length + 1;
+
+      setProperty(updateBtn, 'pointerEvents', isEmpty || (isReplying && isLengthValid) ? 'none' : 'auto');
     });
 
     updateBtn.addEventListener('click', function () {

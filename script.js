@@ -100,6 +100,8 @@ const renderCommentChanges = function () {
   });
 };
 
+mainContainer.addEventListener('click', handleVoteClick);
+
 function updateTimeAgo(timestampElement, createdTimestamp) {
   const currentTime = new Date();
   const timeDiff = Math.floor((currentTime - createdTimestamp) / 1000);
@@ -196,8 +198,6 @@ function handleVoteClick(e) {
   }
 }
 
-mainContainer.addEventListener('click', handleVoteClick);
-
 const renderInitialTimestamps = function (key, className, uniqueCommentId, html) {
   const timestampEl = document.querySelector(`[data-unique-id="${uniqueCommentId}"] .timestamp`);
   const createdTimestamp = new Date().getTime();
@@ -213,20 +213,19 @@ const renderInitialTimestamps = function (key, className, uniqueCommentId, html)
     const existingComments = JSON.parse(localStorage.getItem('newComment')) || [];
     existingComments.push(newCommentData);
     localStorage.setItem('newComment', JSON.stringify(existingComments));
-  } else if (key === 'firstPostNewReply') {
-    const existingFirstPostReplyComments = JSON.parse(localStorage.getItem('firstPostNewReply')) || [];
-    existingFirstPostReplyComments.push(newCommentData);
-    localStorage.setItem('firstPostNewReply', JSON.stringify(existingFirstPostReplyComments));
+  } else if (key === 'firstCommentReplies') {
+    const existingFirstCommentReplies = JSON.parse(localStorage.getItem('firstCommentReplies')) || [];
+    existingFirstCommentReplies.push(newCommentData);
+    localStorage.setItem('firstCommentReplies', JSON.stringify(existingFirstCommentReplies));
   } else {
-    const existingLastPostReplyComments = JSON.parse(localStorage.getItem('lastPostNewReply')) || [];
-    existingLastPostReplyComments.push(newCommentData);
-    localStorage.setItem('lastPostNewReply', JSON.stringify(existingLastPostReplyComments));
+    const existingSecondAndLastCommentReplies = JSON.parse(localStorage.getItem('secondAndLastCommentReplies')) || [];
+    existingSecondAndLastCommentReplies.push(newCommentData);
+    localStorage.setItem('secondAndLastCommentReplies', JSON.stringify(existingSecondAndLastCommentReplies));
   }
   setInterval(() => {
     const timestamps = document.querySelectorAll(`.${className} .timestamp`);
     timestamps.forEach((timestamp) => {
       const createdTimestamp = parseFloat(timestamp.getAttribute('data-created'));
-      console.log(createdTimestamp);
       updateTimeAgo(timestamp, createdTimestamp);
     });
   }, 60000);
@@ -324,7 +323,7 @@ replyEl.forEach((el, i) => {
         newReplyEls[index].remove();
         setProperty(el, 'opacity', '');
 
-        const firstPostNewReplyHTML = `
+        const firstCommentNewReplyHTML = `
         <div class="comment reply-comment first-comment-new-reply" data-unique-id=${uniqueCommentId}>
           <div class="vote-btn-container" data-initial-vote="0" data-lowest-vote="-1" data-max-vote="1">
             <svg width="11" height="11" xmlns="http://www.w3.org/2000/svg">
@@ -358,7 +357,7 @@ replyEl.forEach((el, i) => {
           </div>
         </div>`;
 
-        const lastPostNewReplyHTML = `
+        const secondAndLastCommentReplyHTML = `
               <div class="comment reply-comment last-comment-new-reply" data-unique-id=${uniqueCommentId}>
           <div class="vote-btn-container" data-initial-vote="0" data-lowest-vote="-1" data-max-vote="1">
             <svg width="11" height="11" xmlns="http://www.w3.org/2000/svg">
@@ -394,14 +393,12 @@ replyEl.forEach((el, i) => {
 
         if (i === 0) {
           setProperty(firstReplyContainer, 'display', 'flex');
-          firstReplyContainer.insertAdjacentHTML('beforeend', firstPostNewReplyHTML);
-          renderInitialTimestamps('firstPostNewReply', 'first-comment-new-reply', uniqueCommentId, firstPostNewReplyHTML);
+          firstReplyContainer.insertAdjacentHTML('beforeend', firstCommentNewReplyHTML);
+          renderInitialTimestamps('firstCommentReplies', 'first-comment-new-reply', uniqueCommentId, firstCommentNewReplyHTML);
           autoUpvote(uniqueCommentId);
-        }
-
-        if (i !== 0) {
-          lastReplyContainer.insertAdjacentHTML('beforeend', lastPostNewReplyHTML);
-          renderInitialTimestamps('lastPostNewReply', 'last-comment-new-reply', uniqueCommentId, lastPostNewReplyHTML);
+        } else {
+          lastReplyContainer.insertAdjacentHTML('beforeend', secondAndLastCommentReplyHTML);
+          renderInitialTimestamps('secondAndLastCommentReplies', 'last-comment-new-reply', uniqueCommentId, secondAndLastCommentReplyHTML);
           autoUpvote(uniqueCommentId);
         }
       });
@@ -539,10 +536,10 @@ mainContainer.addEventListener('click', function (e) {
       setProperty(editEl, 'opacity', '');
 
       if (firstReplyContainer.contains(comment)) {
-        updateCommentText('firstPostNewReply', uniqueCommentId);
+        updateCommentText('firstCommentReplies', uniqueCommentId);
       }
       if (lastReplyContainer.contains(comment)) {
-        updateCommentText('lastPostNewReply', uniqueCommentId);
+        updateCommentText('secondAndLastCommentReplies', uniqueCommentId);
       }
       if (comment.classList.contains('default-comment-4')) {
         const commentTextContainer = comment.querySelector('.comment-text-container').innerHTML;
@@ -579,9 +576,9 @@ deleteModalContainer.addEventListener('click', function (e) {
     const uniqueCommentId = comment.getAttribute('data-unique-id');
 
     if (comment.classList.contains('first-comment-new-reply')) {
-      deleteComment('firstPostNewReply', uniqueCommentId, comment);
+      deleteComment('firstCommentReplies', uniqueCommentId, comment);
     } else if (comment.classList.contains('last-comment-new-reply')) {
-      deleteComment('lastPostNewReply', uniqueCommentId, comment);
+      deleteComment('secondAndLastCommentReplies', uniqueCommentId, comment);
     } else if (uniqueCommentId === 'default-reply-2') {
       comment.remove();
       localStorage.setItem('defaultReplyDeleted', 'true');
@@ -609,8 +606,8 @@ window.addEventListener('DOMContentLoaded', async function () {
   await data();
 
   const existingComments = JSON.parse(localStorage.getItem('newComment')) || [];
-  const existingFirstPostReplyComments = JSON.parse(localStorage.getItem('firstPostNewReply')) || [];
-  const existingLastPostReplyComments = JSON.parse(localStorage.getItem('lastPostNewReply')) || [];
+  const existingFirstCommentReplies = JSON.parse(localStorage.getItem('firstCommentReplies')) || [];
+  const existingSecondAndLastCommentReplies = JSON.parse(localStorage.getItem('secondAndLastCommentReplies')) || [];
   const defaultReplyEl = document.querySelector('.default-comment-4');
 
   if (localStorage.getItem('defaultReplyDeleted') === 'true') {
@@ -618,17 +615,17 @@ window.addEventListener('DOMContentLoaded', async function () {
   }
 
   if (localStorage.getItem('defaultReply')) {
-    const lastPostText = defaultLastComment.querySelector('.comment-text-container');
-    lastPostText.innerHTML = localStorage.getItem('defaultReply');
+    const defaultLastCommentTextContainer = defaultLastComment.querySelector('.comment-text-container');
+    defaultLastCommentTextContainer.innerHTML = localStorage.getItem('defaultReply');
   }
 
-  if (existingFirstPostReplyComments.length !== 0) {
+  if (existingFirstCommentReplies.length !== 0) {
     setProperty(firstReplyContainer, 'display', 'flex');
-    loadNewCommentsUponRefresh(existingFirstPostReplyComments, firstReplyContainer, 'beforeend', 'first-comment-new-reply');
+    loadNewCommentsUponRefresh(existingFirstCommentReplies, firstReplyContainer, 'beforeend', 'first-comment-new-reply');
   }
 
-  if (existingLastPostReplyComments.length !== 0) {
-    loadNewCommentsUponRefresh(existingLastPostReplyComments, lastReplyContainer, 'beforeend', 'last-comment-new-reply');
+  if (existingSecondAndLastCommentReplies.length !== 0) {
+    loadNewCommentsUponRefresh(existingSecondAndLastCommentReplies, lastReplyContainer, 'beforeend', 'last-comment-new-reply');
   }
 
   if (existingComments.length !== 0) {

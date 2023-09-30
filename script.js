@@ -23,9 +23,9 @@ const updateCommentText = function (key, uniqueCommentId) {
 
   if (arr) {
     arr.forEach((_, i) => {
-      if (arr[i].html.includes(uniqueCommentId)) {
+      if (arr[i].commentHTML.includes(uniqueCommentId)) {
         const index = arr.indexOf(arr[i]);
-        arr[index].html = comment.outerHTML;
+        arr[index].commentHTML = comment.outerHTML;
         localStorage.setItem(key, JSON.stringify(arr));
         return;
       }
@@ -47,9 +47,9 @@ function isMobileDevice() {
 
 const loadNewCommentsUponRefresh = function (arr, el, location, className) {
   arr.forEach((commentData, i) => {
-    const { html, createdTimestamp } = commentData;
+    const { commentHTML, createdTimestamp } = commentData;
 
-    el.insertAdjacentHTML(location, html);
+    el.insertAdjacentHTML(location, commentHTML);
 
     const newCommentTimestamp = document.querySelectorAll(`.${className} .timestamp`);
     newCommentTimestamp[i].setAttribute('data-created', createdTimestamp.toString());
@@ -64,7 +64,7 @@ const deleteComment = function (key, uniqueCommentId, comment) {
   comment.remove();
 
   arr.forEach((_, i) => {
-    if (arr[i].html.includes(uniqueCommentId)) {
+    if (arr[i].commentHTML.includes(uniqueCommentId)) {
       const index = arr.indexOf(arr[i]);
       arr.splice(index, 1);
       return;
@@ -73,7 +73,9 @@ const deleteComment = function (key, uniqueCommentId, comment) {
 
   if (arr.length !== 0) {
     localStorage.setItem(key, JSON.stringify(arr));
-  } else localStorage.removeItem(key);
+  } else {
+    localStorage.removeItem(key);
+  }
 
   if (localStorage.getItem(`commentData_${uniqueCommentId}`)) {
     localStorage.removeItem(`commentData_${uniqueCommentId}`);
@@ -102,21 +104,21 @@ const renderCommentChanges = function () {
 
 mainContainer.addEventListener('click', handleVoteClick);
 
-function updateTimeAgo(timestampElement, createdTimestamp) {
+function updateTimeAgo(timestampEl, createdTimestamp) {
   const currentTime = new Date();
   const timeDiff = Math.floor((currentTime - createdTimestamp) / 1000);
 
   if (timeDiff < 60) {
-    timestampElement.textContent = 'Just now';
+    timestampEl.textContent = 'Just now';
   } else if (timeDiff < 3600) {
     const minutesAgo = Math.floor(timeDiff / 60);
-    timestampElement.textContent = minutesAgo + ' minute' + (minutesAgo > 1 ? 's' : '') + ' ago';
+    timestampEl.textContent = minutesAgo + ' minute' + (minutesAgo > 1 ? 's' : '') + ' ago';
   } else if (timeDiff < 86400) {
     const hoursAgo = Math.floor(timeDiff / 3600);
-    timestampElement.textContent = hoursAgo + ' hour' + (hoursAgo > 1 ? 's' : '') + ' ago';
+    timestampEl.textContent = hoursAgo + ' hour' + (hoursAgo > 1 ? 's' : '') + ' ago';
   } else {
     const daysAgo = Math.floor(timeDiff / 86400);
-    timestampElement.textContent = daysAgo + ' day' + (daysAgo > 1 ? 's' : '') + ' ago';
+    timestampEl.textContent = daysAgo + ' day' + (daysAgo > 1 ? 's' : '') + ' ago';
   }
 }
 
@@ -198,14 +200,9 @@ function handleVoteClick(e) {
   }
 }
 
-const renderInitialTimestamps = function (key, className, uniqueCommentId, html) {
-  const timestampEl = document.querySelector(`[data-unique-id="${uniqueCommentId}"] .timestamp`);
-  const createdTimestamp = new Date().getTime();
-  timestampEl.setAttribute('data-created', createdTimestamp.toString());
-  updateTimeAgo(timestampEl, createdTimestamp);
-
+const addCommentToLocalStorage = function (key, commentHTML, createdTimestamp) {
   const newCommentData = {
-    html,
+    commentHTML,
     createdTimestamp,
   };
 
@@ -222,6 +219,17 @@ const renderInitialTimestamps = function (key, className, uniqueCommentId, html)
     existingSecondAndLastCommentReplies.push(newCommentData);
     localStorage.setItem('secondAndLastCommentReplies', JSON.stringify(existingSecondAndLastCommentReplies));
   }
+};
+
+const renderInitialTimestamps = function (key, className, uniqueCommentId, commentHTML) {
+  const timestampEl = document.querySelector(`[data-unique-id="${uniqueCommentId}"] .timestamp`);
+  const createdTimestamp = new Date().getTime();
+
+  timestampEl.setAttribute('data-created', createdTimestamp.toString());
+  updateTimeAgo(timestampEl, createdTimestamp);
+
+  addCommentToLocalStorage(key, commentHTML, createdTimestamp);
+
   setInterval(() => {
     const timestamps = document.querySelectorAll(`.${className} .timestamp`);
     timestamps.forEach((timestamp) => {
@@ -431,7 +439,7 @@ sendBtnEl.addEventListener('click', async function () {
     newMessage = createCommentTextArea.value;
   }
 
-  const html = `
+  const commentHTML = `
       <div class="comment non-reply-comment new-comment" data-unique-id=${uniqueCommentId}>
         <div class="vote-btn-container" data-initial-vote="0" data-lowest-vote="-1" data-max-vote="1">
            <svg width="11" height="11" xmlns="http://www.w3.org/2000/svg">
@@ -466,10 +474,10 @@ sendBtnEl.addEventListener('click', async function () {
       </div>`;
 
   if (createCommentTextArea.value) {
-    createCommentContainer.insertAdjacentHTML('beforebegin', html);
+    createCommentContainer.insertAdjacentHTML('beforebegin', commentHTML);
     createCommentTextArea.value = '';
 
-    renderInitialTimestamps('newComment', 'new-comment', uniqueCommentId, html);
+    renderInitialTimestamps('newComment', 'new-comment', uniqueCommentId, commentHTML);
   }
 
   autoUpvote(uniqueCommentId);
